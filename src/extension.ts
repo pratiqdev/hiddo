@@ -18,7 +18,7 @@ const ALWAYS_EXCLUDE_FILES = [
 	"node_modules"
 ];
 
-
+let cwd:any = null;
 
 
 const log = (...str: any[]) => console.log('HIDDO:', ...str);
@@ -53,6 +53,10 @@ const loadHiddoConfig = () => {
 		return;
 	}
 	for (const workspaceFolder of workspaceFolders) {
+		if(!cwd){
+			cwd = workspaceFolder.uri.fsPath.split('/').pop();
+			log('Set current working dir:', cwd);
+		}
 		const settingsFilePath = workspaceFolder.uri.fsPath + '/hiddo.json';
 		if (fs.existsSync(settingsFilePath)) {
 			// log(`Found hiddo.json: ${settingsFilePath}`);
@@ -94,7 +98,7 @@ const exploreFiles = async (dir: string, exclusions: string[], filePaths: string
 				const currentPath = path.join(dir, files[i]);
 				const stat = fs.lstatSync(currentPath);
 				if (stat.isDirectory()) {
-					filePaths.push(currentPath)
+					filePaths.push(currentPath);
 					await exploreFiles(currentPath, exclusions, filePaths);
 				} else {
 					filePaths.push(currentPath);
@@ -118,7 +122,7 @@ const enableHiddo = async () => {
 	config = vscode.workspace.getConfiguration();
 
 	if (!workspaceFolders) {
-		vscode.window.showInformationMessage('No folder is open');
+		vscode.window.showInformationMessage('No folder is open. Open a workspace and run this command again.');
 		return;
 	}
 
@@ -167,14 +171,26 @@ const enableHiddo = async () => {
 	filePaths.push(...ALWAYS_EXCLUDE_FILES);
 
 	const filePathsBoolMap = filePaths.reduce((obj:any, key:string) => {
-		let settingsGlobKey = key.split('/').pop() ?? key;
+		let settingsGlobKey = key.split(cwd+'/' ?? '/')[1] ?? key;
 		let activeZone = store.get('activeZone');
 		let zones = store.get('zones');
-		let zonePatterns = zones[activeZone];
 		// log(zones);
 		// log('Using active zone:', activeZone);
 		// log('Contains patterns:', zonePatterns);
 		let isHidden = true;
+		//~ This method needs to be updated...
+		//~ It should look through previous values and check if the root
+		//~ dir in a path is already hidden - to not add the nested files
+		//~ to the exclusion map.
+		//~ so if { 'app': true }
+		//~ then { 'app/dir': true } should NOT be added
+		//~
+		//~ Only if the nested directory contains a false should the neighboring 
+		//~ dirs/files should be hidden
+		//~ so if { 'app/dir': false }
+		//~ then { 'app/other': true } should be added
+		//~
+		//~
 		Object.values(zones[activeZone])?.forEach((value:unknown) => {
 			let match = key === value || minimatch(key, value as string);
 			// log('matching:', {
