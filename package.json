@@ -13,11 +13,17 @@
   "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activityBar": [
+        {
+          "id": "hiddo",
+          "title": "Hiddo",
+          "icon": "./icon.svg"
+        }
+      ]
+    },
     "commands": [
-      {
-        "command": "hiddo.helloWorld",
-        "title": "Hiddo: Hello World"
-      },
+
       {
         "command": "hiddo.enable",
         "title": "Hiddo: Enable"
@@ -31,9 +37,14 @@
         "title": "Hiddo: Set Zone"
       },
       {
-        "command": "hiddo.status",
-        "title": "Hiddo: Status"
+        "command": "hiddo.nextZone",
+        "title": "Hiddo: Cycle Zones"
+      },
+      {
+        "command": "hiddo.defaults",
+        "title": "Hiddo: Set Defaults"
       }
+
     ]
   },
   "scripts": {
@@ -57,5 +68,12 @@
     "minimatch": "^9.0.1",
     "mocha": "^10.2.0",
     "typescript": "^5.1.3"
+  },
+  "publisher": "pratiqdev",
+  "keywords": ["vscode-extension", "files", "workspace"],
+  "repository": {
+      "type": "git",
+      "url": "https://github.com/pratiqdev/hiddo"
   }
+
 }

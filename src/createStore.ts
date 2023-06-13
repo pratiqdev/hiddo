@@ -16,10 +16,12 @@ let INITIAL_EXCLUDED_FILES: null | Record<string, any> = null;
 
 const initialStore = {
     activeZone: null,
+    activeZoneIndex: 0,
     zones: {},
     enabled: false,
     isNew: false,
     initialExcludedFiles: {},
+    hasDefaults: false,
 };
 
 function createStore(context: vscode.ExtensionContext): Store {

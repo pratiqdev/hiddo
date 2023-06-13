@@ -1,0 +1,2 @@
+Failed to find the "go" binary in either GOROOT() or PATH(/home/shlep/.nvm/versions/node/v18.14.2/bin:/home/shlep/.local/share/pnpm:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin). Check PATH, or Install Go and reload the window. If PATH isn't what you expected, see 
+https://github.com/golang/vscode-go/issues/971
