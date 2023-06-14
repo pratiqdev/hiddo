@@ -34,7 +34,7 @@ const state:State = {
 
 //&																														
 const setExclusionRules = (rules:Record<string, boolean>) => {
-	vscode.workspace.getConfiguration().update('files.exclude', rules, vscode.ConfigurationTarget.Workspace);
+	vscode.workspace.getConfiguration().update('files.exclude', rules);
 };
 
 
@@ -91,17 +91,18 @@ const refresh = () => {
 		log("Found root path:", state.rootPath);
 
 		let configPath = path.join(state.rootPath, CONFIG_FILE_PATH);
-		log("Using config path:", configPath);
-
+		
 		// refresh the config file
-		return;
+		log("Loading config file:", configPath);
 		let configFile = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+		log("config file loaded.");
 
 		if(!configFile || !Object.keys(configFile).length){
 			log("No config file found...");
 			return;
 		}else{
 			state.zones = configFile;
+			log("Loaded config file");
 		}
 
 		if(!state.hasDefaults){
