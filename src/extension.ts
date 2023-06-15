@@ -7,7 +7,8 @@ import { minimatch } from 'minimatch';
 
 const CONFIG_FILE_PATH = 'hiddo.json';
 let cwd = null;
-
+let startBracket = "__________________________________________________ HIDDOTU START";
+let endBracket =   "__________________________________________________ HIDDOTU END";
 
 const log = console.log;
 
@@ -33,13 +34,43 @@ const state:State = {
 
 
 //&																														
+const resetExclusionRules = () => {
+	let { get, update } = vscode.workspace.getConfiguration();
+	let currentRules:Record<string, boolean> = { ...get("files.exclude")} ?? {};
+
+	if(currentRules && startBracket in currentRules && endBracket in currentRules){
+		let keys = Object.keys(currentRules);
+		let startIndex = keys.indexOf(startBracket);
+		let endIndex = keys.indexOf(endBracket);
+		
+		// If both startBracket and endBracket are found, remove the keys between them
+		if (startIndex !== -1 && endIndex !== -1) {
+			for (let i = startIndex + 1; i < endIndex; i++) {
+				delete currentRules[keys[i]];
+			}
+			delete currentRules[startBracket];
+			delete currentRules[endBracket];
+		}
+		// Update configuration with modified currentRules
+		update("files.exclude", currentRules, vscode.ConfigurationTarget.Workspace);
+		state.defaults = currentRules;
+		state.hasDefaults = true;
+		return;
+	}
+	state.defaults = currentRules ?? {};
+	state.hasDefaults = true;
+
+};
+
+
+//&																														
 const setExclusionRules = (rules?:Record<string, boolean>) => {
 	if(rules){
 		vscode.workspace.getConfiguration().update('files.exclude', {
 			...state.defaults,
-			"_____________________________________hiddotu start": true,
+			[startBracket]: true,
 			...rules,
-			"_____________________________________hiddotu end": true,
+			[endBracket]: true,
 	
 		});
 	}else{
@@ -211,6 +242,7 @@ export const activate = (context: vscode.ExtensionContext) => {
 	log('Activating...');
 	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
 	statusBarItem.show();
+	resetExclusionRules();
 	
 	
 
