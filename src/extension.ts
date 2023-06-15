@@ -33,8 +33,19 @@ const state:State = {
 
 
 //&																														
-const setExclusionRules = (rules:Record<string, boolean>) => {
-	vscode.workspace.getConfiguration().update('files.exclude', rules);
+const setExclusionRules = (rules?:Record<string, boolean>) => {
+	if(rules){
+		vscode.workspace.getConfiguration().update('files.exclude', {
+			...state.defaults,
+			"_____________________________________hiddotu start": true,
+			...rules,
+			"_____________________________________hiddotu end": true,
+	
+		});
+	}else{
+		vscode.workspace.getConfiguration().update('files.exclude', state.defaults);
+	}
+
 };
 
 
@@ -61,11 +72,44 @@ function generateAndSetExcludeRules(): void {
 			mark: true // add a trailing / to directories
 		});
 
+		// Function to check if a rule for a file or directory already exists
+		function ruleExists(fileOrDir: string): boolean {
+			if (fileOrDir.endsWith('/')) {
+				let dir = fileOrDir.slice(0, -1);
+				while (dir) {
+					if (excludeRules[dir + '/**']) {
+						return true;
+					}
+					let index = dir.lastIndexOf('/');
+					dir = index >= 0 ? dir.slice(0, index) : '';
+				}
+			} else {
+				let dir = path.dirname(fileOrDir);
+				while (dir && dir !== '.') {
+					if (excludeRules[dir + '/**']) {
+						return true;
+					}
+					let index = dir.lastIndexOf('/');
+					dir = index >= 0 ? dir.slice(0, index) : '';
+				}
+			}
+			return false;
+		}
+
 
 		// Exclude files/directories that do not match any glob pattern in the specified zone
 		allFilesAndDirs.forEach((fileOrDir:string) => {
 			let isExcluded = !globPatterns.some(pattern => minimatch(fileOrDir, pattern));
-			excludeRules[fileOrDir] = isExcluded;
+			if (isExcluded) {
+				if (ruleExists(fileOrDir)) {
+					return;
+				}
+				if (fileOrDir.endsWith('/')) {
+					excludeRules[fileOrDir + '**'] = isExcluded;
+				} else {
+					excludeRules[fileOrDir] = isExcluded;
+				}
+			}
 		});
 
 		setExclusionRules(excludeRules);
@@ -75,6 +119,18 @@ function generateAndSetExcludeRules(): void {
 	}
 
 }
+
+
+//&																														
+let statusBarItem:vscode.StatusBarItem | null = null;
+const toggleColor = () => {
+	if(!statusBarItem){ return; }
+	statusBarItem.text = state.enabled ? `$(zap) ${state.zone}` : `$(zap) disabled`;
+	statusBarItem.tooltip = state.enabled ? "Cycle Next Zone" : "Enable Hiddo filtering";
+	statusBarItem.command = "hiddotu.nextZone";
+	statusBarItem.color = "yellow";
+	statusBarItem.name = "Hiddo Explorer Filter";
+};
 
 
 
@@ -118,7 +174,7 @@ const refresh = () => {
 		if(!state.zone){
 			let keys = Object.keys(state.zones);
 			if(keys.length){
-				log("Setting active zone to first provided zone.");
+				log("Setting active zone to first provided zone:", keys[0]);
 				state.zone = keys[0];
 			}else{
 				log("No active zone and no zones available... Check you 'hiddo.json' config.");
@@ -129,11 +185,17 @@ const refresh = () => {
 		if(state.enabled){
 			generateAndSetExcludeRules();
 		}else{
-			setExclusionRules(state.defaults);
+			setExclusionRules();
 		}
+		toggleColor();
+		log("------------------------------");
+		log(state);
+		log("------------------------------");
 
 	}catch(err){
 		log("Error refreshing hiddo:");
+		state.enabled = false;
+		toggleColor();
 		log(err);
 	}
 
@@ -143,10 +205,12 @@ const refresh = () => {
 
 
 
+
 //&																																											
 export const activate = (context: vscode.ExtensionContext) => {
 	log('Activating...');
-
+	statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 0);
+	statusBarItem.show();
 	
 	
 
@@ -171,6 +235,43 @@ export const activate = (context: vscode.ExtensionContext) => {
 			state.defaults = vscode.workspace.getConfiguration().get('files.exclude') ?? {};
 			state.hasDefaults = true;
 			refresh();
+		},
+
+		'hiddotu.nextZone': () => { 
+			let { index, zones } = state;
+		
+			let keys = Object.keys(zones);
+			log('--- NEXT ZONE --------------------------------');
+			log('>> Idx:', index, keys[index]);
+		
+			if(index === keys.length - 1){
+				state.index = -1;
+				state.enabled = false;
+				refresh();
+				log('>> Idx reached end of zones - turning off hiddo');
+			}else{
+				index++;
+				state.enabled = true;
+				state.zone = keys[index];
+				state.index = index;
+				refresh();
+				log('>> new Idx:', index, keys[index]);
+		
+			}
+		
+		},
+
+		'hiddotu.zone': async () => {
+			// load the zones again if the hiddo fille has changed
+			let zoneKeys = Object.keys(state.zones);
+		
+			vscode.window.showQuickPick(zoneKeys).then(selected => {
+				log(selected);
+				state.zone = selected ?? null;
+				state.index = Object.keys(state.zones).indexOf(selected as string) || 0;
+				state.enabled = true;
+				refresh();
+			});
 		},
 
 

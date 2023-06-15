@@ -35,6 +35,10 @@
       {
         "command": "hiddotu.defaults",
         "title": "Hiddotu: Set Defaults"
+      },
+      {
+        "command": "hiddotu.zone",
+        "title": "Hiddotu: Set Zone"
       }
 
     ]
