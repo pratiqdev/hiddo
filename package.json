@@ -3,15 +3,17 @@
   "displayName": "Hiddotu",
   "description": "",
   "author": "pratiqdev",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.79.0"
   },
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
   "main": "./out/extension.js",
+  "activationEvents":[
+    "onStartupFinished"
+  ],
   "contributes": {
     "commands": [
       {
@@ -55,6 +57,7 @@
     "typescript": "^5.1.3"
   },
   "publisher": "pratiqdev",
+  "icon": "hiddotu_icon.png",
   "keywords": [
     "vscode-extension",
     "files",
