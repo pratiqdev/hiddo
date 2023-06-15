@@ -1,6 +1,6 @@
 {
-  "name": "hiddo",
-  "displayName": "Hiddo",
+  "name": "hiddotu",
+  "displayName": "Hiddotu",
   "description": "",
   "author": "pratiqdev",
   "version": "0.0.1",
@@ -16,8 +16,8 @@
     "viewsContainers": {
       "activityBar": [
         {
-          "id": "hiddo",
-          "title": "Hiddo",
+          "id": "hiddotu",
+          "title": "Hiddotu",
           "icon": "./icon.svg"
         }
       ]
@@ -25,24 +25,16 @@
     "commands": [
 
       {
-        "command": "hiddo.enable",
-        "title": "Hiddo: Enable"
+        "command": "hiddotu.enable",
+        "title": "Hiddotu: Enable"
       },
       {
-        "command": "hiddo.disable",
-        "title": "Hiddo: Disable"
+        "command": "hiddotu.disable",
+        "title": "Hiddotu: Disable"
       },
       {
-        "command": "hiddo.zone",
-        "title": "Hiddo: Set Zone"
-      },
-      {
-        "command": "hiddo.nextZone",
-        "title": "Hiddo: Cycle Zones"
-      },
-      {
-        "command": "hiddo.defaults",
-        "title": "Hiddo: Set Defaults"
+        "command": "hiddotu.defaults",
+        "title": "Hiddotu: Set Defaults"
       }
 
     ]

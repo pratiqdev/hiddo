@@ -146,14 +146,13 @@ const refresh = () => {
 //&																																											
 export const activate = (context: vscode.ExtensionContext) => {
 	log('Activating...');
-	const hiddoConfig = vscode.workspace.getConfiguration('hiddo');
 
 	
 	
 
 	const commands: Record<string, (...args:any[]) => void> = {
 
-		'hiddo.enable': () => { 
+		'hiddotu.enable': () => { 
 			log('Enabling...');
 			state.enabled = true;
 			refresh();
@@ -161,15 +160,17 @@ export const activate = (context: vscode.ExtensionContext) => {
 
 		},
 		
-		'hiddo.disable': () => { 
+		'hiddotu.disable': () => { 
 			log('Disabling...');
 			state.enabled = false;
 			refresh();
 		},
 
-		'hiddo.defaults': () => { 
+		'hiddotu.defaults': () => { 
 			log('Setting defaults...');
-			
+			state.defaults = vscode.workspace.getConfiguration().get('files.exclude') ?? {};
+			state.hasDefaults = true;
+			refresh();
 		},
 
 
